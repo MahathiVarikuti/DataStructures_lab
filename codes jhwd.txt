@@ -1,0 +1,360 @@
+tv remote 
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+// Stack definition using typedef
+typedef struct {
+    int top;
+    int items[MAX];
+} Stack;
+
+// Function to create a stack
+void createStack(Stack* stack) {
+    stack->top = -1;
+}
+
+// Function to check if the stack is empty
+int isEmpty(Stack* stack) {
+    return stack->top == -1;
+}
+
+// Function to push an element to the stack
+void push(Stack* stack, int element) {
+    if (stack->top == MAX - 1) {
+        printf("Stack overflow\n");
+        return;
+    }
+    stack->items[++stack->top] = element;
+}
+
+// Function to pop an element from the stack
+int pop(Stack* stack) {
+    if (isEmpty(stack)) {
+        printf("No channel to pop\n");
+        return -1;
+    }
+    return stack->items[stack->top--];
+}
+
+// Function to get the current (top) channel from the stack
+int top(Stack* stack) {
+    if (isEmpty(stack)) {
+        return -1;
+    }
+    return stack->items[stack->top];
+}
+
+// Function to change the channel
+void changeChannel(Stack* currentStack, Stack* redoStack, int newChannel) {
+    push(currentStack, newChannel);
+    redoStack->top = -1;  // Clear redo stack
+    printf("Changed to channel %d\n", newChannel);
+}
+
+// Function to undo the last channel change
+void undo(Stack* currentStack, Stack* redoStack) {
+    if (isEmpty(currentStack)) {
+        printf("No previous channel to go back to\n");
+        return;
+    }
+    int lastChannel = pop(currentStack);
+    push(redoStack, lastChannel);
+    printf("Undo: Current channel is now %d\n", top(currentStack));
+}
+
+// Function to redo the last undone channel change
+void redo(Stack* currentStack, Stack* redoStack) {
+    if (isEmpty(redoStack)) {
+        printf("No channel to redo\n");
+        return;
+    }
+    int redoChannel = pop(redoStack);
+    push(currentStack, redoChannel);
+    printf("Redo: Current channel is %d\n", redoChannel);
+}
+
+// Function to display the current channel
+void displayCurrentChannel(Stack* currentStack) {
+    if (isEmpty(currentStack)) {
+        printf("No channel selected\n");
+    } else {
+        printf("Current channel: %d\n", top(currentStack));
+    }
+}
+
+int main() {
+    Stack currentStack, redoStack;
+    createStack(&currentStack);
+    createStack(&redoStack);
+
+    // Start with channel 1
+    changeChannel(&currentStack, &redoStack, 1);
+
+    // Simulate channel changes
+    changeChannel(&currentStack, &redoStack, 2);
+    changeChannel(&currentStack, &redoStack, 3);
+
+    // Display current channel
+    displayCurrentChannel(&currentStack);
+
+    // Undo channel change
+    undo(&currentStack, &redoStack);
+
+    // Redo channel change
+    redo(&currentStack, &redoStack);
+
+    // Display final current channel
+    displayCurrentChannel(&currentStack);
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+reversing stack 
+
+// Function to insert an element at the bottom of a stack
+void insertAtBottom(struct Stack* stack, int item) {
+    if (isEmpty(stack)) {
+        push(stack, item);
+    } else {
+        // Hold all items in function call stack until we reach the bottom
+        int temp = pop(stack);
+        insertAtBottom(stack, item);
+
+        // Once the item is inserted at the bottom, push the held elements back
+        push(stack, temp);
+    }
+}
+
+// Recursive function to reverse the stack
+void reverseStack(struct Stack* stack) {
+    if (!isEmpty(stack)) {
+        // Hold all items in function call stack until we reach the bottom
+        int temp = pop(stack);
+        reverseStack(stack);
+
+        // Insert each item held in the call stack at the bottom
+        insertAtBottom(stack, temp);
+    }
+}
+
+// Function to print the elements of the stack
+void printStack(struct Stack* stack) {
+    for (int i = 0; i <= stack->top; i++) {
+        printf("%d ", stack->items[i]);
+    }
+    printf("\n");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Function to print the Next Greater Element for each element
+void printNGE(int arr[], int n) {
+    struct Stack* stack = createStack();
+    int nge[n]; // Array to store NGE for each element
+    
+    for (int i = n - 1; i >= 0; i--) {
+        while (!isEmpty(stack) && top(stack) <= arr[i]) {
+            pop(stack);
+        }
+
+        // If stack becomes empty, no greater element exists for arr[i]
+        if (isEmpty(stack)) {
+            nge[i] = -1;
+        } else {
+            nge[i] = top(stack);
+        }
+
+        // Push current element to stack
+        push(stack, arr[i]);
+    }
+
+    // Print results
+    for (int i = 0; i < n; i++) {
+        printf("%d → %d\n", arr[i], nge[i]);
+    }
+
+    free(stack);
+}
+
+int main() {
+    int arr[] = {13, 7, 6, 12};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    
+    printNGE(arr, n);
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+deleting element 
+void deleteElements(int arr[], int n, int k) {
+    STACK s;
+    initStack(&s);
+    int count = 0;
+
+    for (int i = 0; i < n; i++) {
+        while (!isEmpty(&s) && s.arr[s.top] < arr[i] && count < k) {
+            pop(&s);
+            count++;
+        }
+        push(&s, arr[i]);
+    }
+
+    // Print the remaining elements in the stack
+    int result[MAX];
+    int size = 0;
+    while (!isEmpty(&s)) {
+        result[size++] = pop(&s);
+    }
+
+    // Print in reverse order to maintain the original sequence
+    for (int i = size - 1; i >= 0; i--) {
+        printf("%d ", result[i]);
+    }
+    printf("\n");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int isPalindrome(char *str) {
+    STACK s;
+    initStack(&s);
+    int length = strlen(str);
+
+    // Push all characters of the string onto the stack
+    for (int i = 0; i < length; i++) {
+        push(&s, str[i]);
+    }
+
+    // Pop characters from the stack and compare with the string
+    for (int i = 0; i < length; i++) {
+        if (str[i] != pop(&s)) {
+            return 0; // Not a palindrome
+        }
+    }
+
+    return 1; // Palindrome
+}
+
+
+
+
+
+
+
+
+
+binary to decimal
+int binaryToDecimal(char *binary) {
+    STACK s;
+    initStack(&s);
+    int decimal = 0, base = 1;
+
+    // Push binary digits onto the stack
+    for (int i = 0; binary[i] != '\0'; i++) {
+        push(&s, binary[i] - '0');
+    }
+
+    // Pop binary digits and calculate the decimal value
+    while (!isEmpty(&s)) {
+        decimal += pop(&s) * base;
+        base *= 2;
+    }
+
+    return decimal;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+decimal to binary 
+void decimalToBinary(int num) {
+    STACK s;
+    initStack(&s);
+
+    while (num > 0) {
+        push(&s, num % 2);
+        num /= 2;
+    }
+
+    printf("Binary equivalent: ");
+    while (!isEmpty(&s)) {
+        printf("%d", pop(&s));
+    }
+    printf("\n");
+}
+
+
+
+
+
+
+
+
+
+
+
+
